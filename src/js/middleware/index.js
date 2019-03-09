@@ -11,7 +11,7 @@ export function forbiddenWordsMiddleware({ dispatch }) {
         const foundWord = forbiddenWords.filter(word =>
           action.payload.cognitive_biasLabel.includes(word)
         );
-        if (foundWord.length) {
+        if (foundWord.length || action.payload.cognitive_biasLabel.length < 1) {
           return dispatch({ type: FOUND_BAD_WORD });
         }
       }

@@ -15,32 +15,32 @@ class ConnectedForm extends Component {
     constructor() {
         super();
         this.state = {
-            title: ""
+            cognitive_biasLabel: ""
         };
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
     }
     handleChange(event) {
-        this.setState({ [event.target.cognitive_bias]: event.target.value });
+        this.setState({ cognitive_biasLabel: event.target.value });
     }
     handleSubmit(event) {
         event.preventDefault();
-        const { title } = this.state;
-        const id = uuidv1();
-        this.props.addEntity({ title, id });
-        this.setState({ title: "" });
+        const { cognitive_biasLabel } = this.state;
+        const cognitive_bias = uuidv1();
+        this.props.addEntity({ cognitive_biasLabel, cognitive_bias });
+        this.setState({ cognitive_biasLabel: "" });
     }
     render() {
-        const { title } = this.state;
+        const { cognitive_biasLabel } = this.state;
         return (
             <form onSubmit={this.handleSubmit}>
                 <div className="form-group">
-                    <label htmlFor="title">Title</label>
+                    <label htmlFor="label">Label</label>
                     <input
                         type="text"
                         className="form-control"
-                        id="title"
-                        value={title}
+                        id="label"
+                        value={cognitive_biasLabel}
                         onChange={this.handleChange}
                     />
                 </div>
