@@ -21,7 +21,7 @@ class ConnectedForm extends Component {
         this.handleSubmit = this.handleSubmit.bind(this);
     }
     handleChange(event) {
-        this.setState({ [event.target.id]: event.target.value });
+        this.setState({ [event.target.cognitive_bias]: event.target.value });
     }
     handleSubmit(event) {
         event.preventDefault();

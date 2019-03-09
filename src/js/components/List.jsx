@@ -8,8 +8,8 @@ const mapStateToProps = state => {
 const ConnectedList = ({ entities }) => (
     <ul className="list-group list-group-flush">
         {entities.map(el => (
-            <li className="list-group-item" key={el.id}>
-                {el.title}
+            <li className="list-group-item" key={el.cognitive_bias}>
+                {el.cognitive_biasLabel}
             </li>
         ))}
     </ul>

@@ -7,11 +7,15 @@ export class Post extends Component {
         this.props.getData();
     }
     render() {
+        let list = [];
+        if (typeof this.props.entities[0] !== 'undefined') {
+          list = this.props.entities[0].list;
+        }
         return (
             <ul className="list-group list-group-flush">
-                {this.props.entities.map(el => (
-                    <li className="list-group-item" key={el.id}>
-                        {el.title}
+                {list.map(el => (
+                    <li className="list-group-item" key={el.cognitive_bias}>
+                        {el.cognitive_biasLabel}
                     </li>
                 ))}
             </ul>

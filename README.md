@@ -107,7 +107,7 @@ It will call a worker saga, which is another generator function for doing the re
 
 A generator function can be paused and resumed during its execution.
 It must be captured in a var and next() called to continue execution.
-```
+```JavaScript
 function* generatorLoop() {
     for (var i = 0; i < 15; i++) {
         yield console.log(i)
@@ -147,8 +147,6 @@ function* workerSaga() {
 
 
 ## Setting up Redux
-
-Notes from [this Redux tutorial](https://www.valentinog.com/blog/redux/).
 
 Install Redux:
 ```
@@ -202,7 +200,7 @@ const mapStateToProps = state => {
 const ConnectedList = ({ entities }) => (
   <ul className="list-group list-group-flush">
     {entities.map(el => (
-      <li className="list-group-item" key={el.id}>{el.title}</li>
+      <li className="list-group-item" key={el.cognitive_bias}>{el.title}</li>
     ))}
   </ul>
 );
@@ -368,9 +366,74 @@ npm run build
 
 ## Links
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+[Create React App](https://github.com/facebook/create-react-app).
 
 [Example](https://github.com/reduxjs/redux/tree/master/examples/todos/src)
-[Samdbox](https://codesandbox.io/s/github/reduxjs/redux/tree/master/examples/todos?from-embed)
+
+[Sandbox](https://codesandbox.io/s/github/reduxjs/redux/tree/master/examples/todos?from-embed)
+
+[Redux tutorial](https://www.valentinog.com/blog/redux/)
+
+
+### Underway
+
+Using our WikiData API, it returns a response with a single item, list which holds an array of entities.
+```
+{
+    "list": [
+        {
+            "cognitive_bias": "http://www.wikidata.org/entity/Q18570",
+            "cognitive_biasLabel": "Hawthorne effect",
+            "cognitive_biasDescription": "social phenomenon",
+            "lang": "en"
+        },
+        ...
+```
+
+However, this turns out to be a bit of a problem for the Redux/Saga/Fetch setup.
+I'm guessing that this is a bit of a hack to get it to render:
+```
+let list = [];
+if (typeof this.props.entities[0] !== 'undefined') {
+  list = this.props.entities[0].list;
+}
+```
+
+Otherwise there is an error in the template because at first the response is empty, so trying to access the first element property fails.  
+
+The original data source looked like this:
+```
+[
+  {
+    "userId": 1,
+    "id": 1,
+    "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
+    "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto"
+  },
+  ...
+```
+
+No object, just an array of objects.  Should we make a new API on the server to support that, or find out how in the React world this should be handled?  It works for now so hopefully the best solution will reveal itself in time.
+
+
+### The plan
+
+The official Redux implementation has some features implemented we want here.
 
 As well as a todo list with an add button, the example has a "Show" component that lets you filter the list by "all", "active", or "complete".
+
+Here is a list of some random things coming up next.
+The Post/Posts class needs to be renamed.
+Title needs to be the label.
+
+
+### Atom error
+Failed to activate the react package
+Cannot read property 'jsxPatch' of undefined
+Hide Stack Trace
+TypeError: Cannot read property 'jsxPatch' of undefined
+    at AtomReact.patchEditorLangModeAutoDecreaseIndentForBufferRow (/Users/tim/.atom/packages/react/lib/atom-react.coffee:41:18)
+    at AtomReact.patchEditorLangMode (/Users/tim/.atom/packages/react/lib/atom-react.coffee:105:5)
+    at AtomReact.processEditor (/Users/tim/.atom/packages/react/lib/atom-react.coffee:306:6)
+
+[This link](https://github.com/orktes/atom-react/issues/256) describes the issue.

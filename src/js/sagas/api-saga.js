@@ -19,9 +19,14 @@ function* workerSaga() {
     yield put({ type: API_ERRORED, payload: e });
   }
 }
-
 function getData() {
-  return fetch("https://jsonplaceholder.typicode.com/posts").then(response =>
-    response.json()
+  return fetch('http://radiant-springs-38893.herokuapp.com/api/list/en',{
+    method: 'GET',
+    headers: {
+      Accept: 'application/json',
+    }
+  }).then(response => {
+      return response.json();
+    }
   );
 }

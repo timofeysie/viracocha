@@ -9,7 +9,7 @@ export function forbiddenWordsMiddleware({ dispatch }) {
       // do your stuff
       if (action.type === ADD_ENTITY) {
         const foundWord = forbiddenWords.filter(word =>
-          action.payload.title.includes(word)
+          action.payload.cognitive_biasLabel.includes(word)
         );
         if (foundWord.length) {
           return dispatch({ type: FOUND_BAD_WORD });
