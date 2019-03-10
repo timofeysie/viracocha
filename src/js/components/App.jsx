@@ -2,7 +2,7 @@
 import React from "react";
 import List from "./List.jsx";
 import Form from "./Form.jsx";
-import Post from "./Posts.jsx";
+import Entities from "./Entities.jsx";
 
 const App = () => (
     <div className="row mt-5">
@@ -16,7 +16,7 @@ const App = () => (
         </div>
         <div className="col-md-4 offset-md-1">
             <h2>API entities</h2>
-            <Post />
+            <Entities />
         </div>
     </div>
 );

@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { getData } from "../actions/index";
 
-export class Post extends Component {
+export class Entities extends Component {
     componentDidMount() {
         this.props.getData();
     }
@@ -32,4 +32,4 @@ function mapStateToProps(state) {
 export default connect(
     mapStateToProps,
     { getData }
-)(Post);
+)(Entities);

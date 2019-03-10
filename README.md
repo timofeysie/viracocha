@@ -327,7 +327,7 @@ const title = { title: this.state };
 
 ```
 
-It's always work trying something out if you can.  Using the basic variable setting from line 142 above causes the input field to have an [object Object] as its initial value and this error when choosing submit:
+It's always worth trying something out to answer your own questions.  Using the basic variable setting from the ```const { title }``` above causes the input field to have an [object Object] as its initial value and this error when choosing submit:
 ```
 Uncaught Invariant Violation: Objects are not valid as a React child (found: object with keys {title}). If you meant to render a collection of children, use an array instead.
     in li (at List.jsx:11)
@@ -354,6 +354,8 @@ const { title } = this.state;
 It finds the property with the same name on the object and sets the constant to that.
 
 
+
+
 ## Available Scripts
 
 In the project directory, you can run:
@@ -375,7 +377,10 @@ npm run build
 [Redux tutorial](https://www.valentinog.com/blog/redux/)
 
 
-### Underway
+Here are some random sections that haven't been organized so far.
+
+
+### The server result issue
 
 Using our WikiData API, it returns a response with a single item, list which holds an array of entities.
 ```
@@ -437,3 +442,20 @@ TypeError: Cannot read property 'jsxPatch' of undefined
     at AtomReact.processEditor (/Users/tim/.atom/packages/react/lib/atom-react.coffee:306:6)
 
 [This link](https://github.com/orktes/atom-react/issues/256) describes the issue.
+
+
+### ImmutableJS two reasons to use
+* referential transparency: mutating an object in-place is hard to reason.
+* mutable data makes it hard to use math to analyze the program — imagine a math theorem where x
+* immutable data we can often use a cheap referential comparison (===) to see if an object has changed rather than a deep comparison.
+* helpful is in determining if we need to re-render a React component.
+
+* performance. use persistent data structures to efficiently make immutable updates, returning a new reference without cloning the underlying data.
+
+```
+state.set('loading', false).set('user', user)
+```
+we only care about the end result so instead we can use the withMutations function to batch these updates:
+```
+state.withMutations(s => s.set('loading', false).set('user', user))
+```
