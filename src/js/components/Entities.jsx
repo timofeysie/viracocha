@@ -1,8 +1,15 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { getData } from "../actions/index";
+import { selectEntity } from "../actions/index";
 
 export class Entities extends Component {
+
+    handleClick(entity) {
+      this.props.selectEntity(entity);
+      selectEntity(entity);
+    }
+
     componentDidMount() {
         this.props.getData();
     }
@@ -14,7 +21,9 @@ export class Entities extends Component {
         return (
             <ul className="list-group list-group-flush">
                 {list.map(el => (
-                    <li className="list-group-item" key={el.cognitive_bias}>
+                    <li onClick={() => this.handleClick(el)}
+                      className="list-group-item"
+                      key={el.cognitive_bias}>
                         {el.cognitive_biasLabel}
                     </li>
                 ))}
@@ -29,7 +38,12 @@ function mapStateToProps(state) {
     };
 }
 
+const mapDispatchToProps = dispatch => ({
+  onClick: event => dispatch(selectEntity(event)) // <-- manually dispatches
+})
+
+
 export default connect(
     mapStateToProps,
-    { getData }
+    { getData, selectEntity }
 )(Entities);

@@ -297,7 +297,7 @@ The description of the last line in the strange fn()() syntax says:
 Regarding the null argument it says:
  *the first argument for connect must be null when mapStateToProps is absent like in the Form example. Otherwise you’ll get TypeError: dispatch is not a function.*
 
-I understand a simple variable declaration, which im this case is to assign the variable the result of the connect() function.  I don't quite get why a varaible would be used instead of a class function in this case:
+I understand a simple variable declaration, which in this case is to assign the variable the result of the connect() function.  I don't quite get why a varaible would be used instead of a class function in this case:
 ```
 const mapStateToProps = state => {
     return { entities: state.entities };
@@ -428,8 +428,8 @@ The official Redux implementation has some features implemented we want here.
 As well as a todo list with an add button, the example has a "Show" component that lets you filter the list by "all", "active", or "complete".
 
 Here is a list of some random things coming up next.
-The Post/Posts class needs to be renamed.
-Title needs to be the label.
+Add select entity for the WikiData list.
+Convert add item to add/edit item description.
 
 
 ### Atom error
@@ -459,3 +459,137 @@ we only care about the end result so instead we can use the withMutations functi
 ```
 state.withMutations(s => s.set('loading', false).set('user', user))
 ```
+
+### The object spread operator in redux
+
+In the React/Redux example app, Object.assign() is used to return a new state object with an updated visibilityFilter property like this:
+```
+return Object.assign({}, state, { visibilityFilter: action.filter })
+```
+
+The notes on this say it makes *reducers difficult to read given its rather verbose syntax*
+
+The same thing can be done with the object spread syntax which is conceptually similar to the ES6 array spread operator.
+```
+return { ...state, visibilityFilter: action.filter }  
+```
+
+
+### The onClick action
+
+Updating the state when the user chooses an entity from the API entities list has been a bit of work.
+
+The accepted answer on [this StackOverflow post](https://stackoverflow.com/questions/39419237/what-is-mapdispatchtoprops) talks about composition of container/component architecture.  The user GreenAsJade says:
+
+*Components are supposed to be concerned only with displaying stuff.
+The only place they are supposed to get information from is their props.*
+
+*Containers are for how you get the stuff to display, and how you handle events.*
+
+Our pattern is somewhat like that.  The Entities file displays a list, and listens to a selection event which should then update the state of the Entity file (I want to say class here, but it's not a class) which will display the currently selected item on the list.
+
+We could even use the router here and move to a new page for this, but one idea that hasn't been tried out yet is the list/detail on the same page.  In a web app on a large device, this would be the way to go, so not going with that approach here.
+
+However, in the sample talked about in the link above, the display component sends the action up.  What we want is the container to send the selected item down, or *across* to the entity file/class.
+
+The big issue right now is that every time the ```mapDispatchToProps``` property is added to the connect function, it causes this error from within the framework:
+```
+connectAdvanced.js:102 Uncaught TypeError: sourceSelector is not a function
+    at Connect.selectDerivedProps (connectAdvanced.js:102)
+```
+
+At first dispatch was missing the t.  Not sure if that mattered, or if it just had to be a function/constant and the second variable or not.  Using the Atom editor with the React plugin installed, shouldn't it catch that?  Oh, we probably need to the *Redux* plugin.
+
+Anyhow, doing this now will update the store:
+```
+handleClick(entity) {
+  this.props.selectEntity(entity);
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    selectEntity: () => {dispatch(SELECT_ENTITY)}
+  }
+}
+
+export default connect(
+    mapStateToProps,
+    { getData, selectEntity }
+)(Entities);
+```
+
+Now the problem is in the reducer.
+```
+if (action.type === SELECT_ENTITY) {
+  return Object.assign({}, state, {
+    entity: state.entity = action.payload
+  });
+}
+```
+
+Actually, it's before this, as the payload is undefined.  So the dispatch is still not set up properly.
+
+Looking at the connect statement again, the API is:
+```
+function connect(mapStateToProps?, mapDispatchToProps?, mergeProps?, options?)
+```
+
+So I guess we *do* need to put it in the connect statement.
+```
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps,
+    { getData, selectEntity }
+)(Entities);
+```
+
+This causes the app to break with the error:
+```
+Error: Invalid value of type object for mergeProps argument when connecting component Entities.
+```
+
+It seems like the mapDispatchToProps should be something like this:
+```
+selectEntity: () => {dispatch(SELECT_ENTITY)}
+```
+
+But then the app is broken and the error is this:
+```
+TypeError: sourceSelector is not a function
+```
+
+Looking at [this kitchen sink example](https://gist.github.com/heygrady/c6c17fc7cbdd978f93a746056f618552), the onClick function is inside the mapDispatchToProps function.  We have ours outside, but that is working fine.  The problem then is how to dispatch the action that is then connected to Redux by using mapDispatchToProps, so maybe the onClick does need to be inside it?
+
+How would it get called then?  The example is also using Thunk, not Saga.  The article that showed both indicated that Saga was the way to go.  Although being forced to use generators seems like a bit of a weird decision...
+
+The link above goes over the basics of the function: *The point is to generate a dispatchProps object. The result is a props object that contains action dispatchers — functions that automatically dispatch actions with the correct payload.*
+
+This our current action creator:
+```
+export function selectEntity(entity) {
+  return { type: SELECT_ENTITY, entity };
+}
+```
+
+The example looks like this:
+```
+export const honk = (payload) => ({ type: GOOSE_HONK, payload })
+```
+
+Are those formats equivalent?  Why would you export a variable attached to an arrow function instead of a function?  Just more modern I supposed.  If we change our working add item action creator to this:
+```
+export const addEntity = payload => {
+  return { type: ADD_ENTITY, payload };
+}
+```
+
+instead of this:
+```
+export function addEntity(payload) {
+  return { type: ADD_ENTITY, payload };
+}
+```
+
+Everything still works.  The Valentino Gagliardi blog was last updated January 2019, but it was probably written before arrow functions became common place.  Using TypeScript for a few years with Angular, I actually haven't used the function keyword for a while.  It does appear *old* to me so if there is no difference I would prefer the fat arrow as long as it doesn't require a polyfill anymore.  I hope to never support IE 11 again...
+
+Rant over, the heygrady examples all include the click event in the mapDispatchToProps function and include Thunk.  Since we want to follow the Valentino/Saga for now, keep looking for the way to update the store with a click action that works in that universe.
