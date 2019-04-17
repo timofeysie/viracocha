@@ -15,6 +15,7 @@ Table of contents
 * [Setting up Redux](#setting-up-Redux)
 * [Connecting Redux to React](#connecting-Redux-to-React)
 * [The stateful form](#the-stateful-form)
+* [The connect function function](#the-connect-function-function)
 * [Available scripts](#available-scripts)
 * [Links](#links)
 
@@ -291,34 +292,33 @@ handleSubmit(event) {
 const Form = connect(null, mapDispatchToProps)(ConnectedForm);
 ```
 
+## The connect function function
+
 The description of the last line in the strange fn()() syntax says:
  *the component gets exported as Form. Form is the result of connecting ConnectedForm with the Redux store.*
 
 Regarding the null argument it says:
  *the first argument for connect must be null when mapStateToProps is absent like in the Form example. Otherwise you’ll get TypeError: dispatch is not a function.*
 
-I understand a simple variable declaration, which in this case is to assign the variable the result of the connect() function.  I don't quite get why a varaible would be used instead of a class function in this case:
+I understand a simple variable declaration, which in this case is to assign the variable the result of the connect() function.  I don't quite get why a variable would be used instead of a class function in this case:
 ```
 const mapStateToProps = state => {
     return { entities: state.entities };
 };
 ```
 
-That looks like an arrow function being used as a variable.  Fair enough, but why not just a junction returning it's value which then sets the variable, like this (in TypeScript):
+That looks like an arrow function being used as a variable.  Fair enough, but why not just a function returning it's value which then sets the variable, like this (in TypeScript):
 ```
 mapStateToProps(state) {
     return { entities: state.entities };
 };
 ```
 
+### A destructuring shortcut
+
 Why not use a straight variable here?
 ```
 const { title } = this.state;
-```
-
-Can't you just do this:
-```
-const title = this.state;
 ```
 
 Is this destructuring without the ellipsis?  Is that setting the JSON *property* as the value, a kind of shorthand for this:
@@ -333,7 +333,7 @@ Uncaught Invariant Violation: Objects are not valid as a React child (found: obj
     in li (at List.jsx:11)
 ```
 
-On first read, it seems to be the opposite of the issue here.  If it said *strings* are not valid as a React chile I would understand that it wanted an object.  Still, the message gives us something to search for.  [This StackOverflow question](https://stackoverflow.com/questions/33117449/invariant-violation-objects-are-not-valid-as-a-react-child) seems to be about the same kind of sitch(uation).
+On first read, it seems to be the opposite of the issue here.  If it said *strings* are not valid as a React child I would understand that it wanted an object.  Still, the message gives us something to search for.  [This StackOverflow question](https://stackoverflow.com/questions/33117449/invariant-violation-objects-are-not-valid-as-a-react-child) seems to be about the same kind of sitch(uation).
 
 The second answer has something like this:  *the correct way to insert the value of count* ```{count}``` *which the compiler presumably turned into {{count: count}}, i.e. trying to insert an Object as a React child.*
 
@@ -347,12 +347,82 @@ const title = this.state.title;
 ```
 
 This does work.  So before when ```const title = this.state;``` was tried, it caused the error because that's the entire state, which is an object.  So it is a destructuring shortcut.
+```
 const title = this.state.title;
-is the same as
+```
+
+is the same as:
+```
 const { title } = this.state;
+```
 
-It finds the property with the same name on the object and sets the constant to that.
+It finds the property with the same name on the object and sets the constant to that.  You don't have to type title twice.
 
+
+### Using hooks
+
+With regard to the function versus class question, with React 16.8 Hooks, we can now use the *useState*  hook to use state and and the *useEffect* hook to use lifecycle events in your functional components.
+
+Trying to implement useState caused this error:
+```
+TypeError: Object(...) is not a function
+```
+
+This was the line in List.jsx:
+```
+const [entity, setEntity] = useState(entity);
+```
+
+According to StackOverflow, react-dom needs to be updated.  The SO answer shows this yarn to install and update:
+```
+yarn install react@16.8.0 react-dom@16.8.0
+yarn upgrade react react-dom
+```
+
+This project currently has
+```
+"react": "^16.7.0",
+"react-dom": "^16.7.0",
+```
+
+So updated those to 16.8.  Now we get this error:
+```
+Hooks can only be called inside the body of a function
+```
+
+If the line is moved into the ConnectedList const, it then causes this error:
+```
+Parsing error: Unexpected token
+```
+
+Looking at the first error, it seems the react-hot-loader *also* needs to be updated:
+```
+npm install react-hot-loader
+```
+
+Yes, npm.  Sorry yarn.
+
+
+
+### Component vs Class
+
+How does using hooks affect the component versus class debate?  If you want to use lifecycle hooks which come from the React.Component you have to extend it in a class components.
+
+The reasons outlined in the docs cite easier to read and test, less code and performance boost.
+
+Best practices such as easier to separate container and presentational components because you need to think more about your component’s state if you don’t have access to setState() in your component.
+
+The simple alternative to classes are called factory methods.  A reason to use classes instead is type safety in all the places where you use the action: components, reducers, effects, etc.
+
+For example, what is the difference between this:
+```
+const CognitoIdToken = () => {};
+```
+
+And this:
+```
+cognitoIdToken() => {}
+```
 
 
 
